@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yay! Order Successful | Bangalore Treats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg-main: #fcf8ee; --primary-pink: #eb547c; --primary-purple: #2f1d58; --accent-yellow: #f6c042; --text-dark: #1a1a1a; --text-muted: #666; --font-main: 'Nunito', sans-serif;}
+        body { background-color: var(--bg-main); color: var(--text-dark); font-family: var(--font-main); text-align: center; padding-top: 10vh; }
+        .success-icon { font-size: 5rem; color: #2ecc71; background: #e8f8f5; width: 150px; height: 150px; line-height: 150px; border-radius: 50%; margin: 0 auto 30px; box-shadow: 0 10px 30px rgba(46, 204, 113, 0.2); }
+        h1 { color: var(--primary-purple); font-size: 3rem; font-weight: 900; margin-bottom: 15px; }
+        p { color: var(--text-muted); font-size: 1.2rem; font-weight: 600; max-width: 500px; margin: 0 auto 40px; line-height: 1.6;}
+        .btns { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;}
+        .btn { padding: 15px 35px; border-radius: 30px; font-weight: 800; text-decoration: none; font-size: 1.1rem; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-store { background: var(--primary-pink); color: #fff; box-shadow: 0 8px 20px rgba(235, 84, 124, 0.3); }
+        .btn-wa { background: #25D366; color: #fff; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3); }
+        img.logo { height: 60px; border-radius: 10px; position: absolute; top: 30px; left: 5%; }
+        @media (max-width: 768px) { h1 { font-size: 2.2rem; } .btn { width: 90%; } img.logo { position: static; margin-bottom: 30px;} }
+    </style>
+</head>
+<body>
+    <a href="/"><img src="{{ url_for('static', filename='requirements/images/logo.jpeg') }}" class="logo" alt="Bangalore Treats"></a>
+    
+    <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+    <h1>Yippee! Order Received</h1>
+    <p>Thank you for choosing Bangalore Treats! We are verifying your UTR details and will dispatch your package full of joy very soon.</p>
+    
+    <div class="btns">
+        <a href="/" class="btn btn-store"><i class="fa-solid fa-bag-shopping"></i> Back to Treats</a>
+        <a href="https://wa.me/{{ settings.phone | replace('+', '') | replace(' ', '') }}?text=Hi! I just placed an order and wanted to check my status." target="_blank" class="btn btn-wa"><i class="fa-brands fa-whatsapp"></i> Chat Support</a>
+    </div>
+</body>
+</html>

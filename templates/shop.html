@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products | Bangalore Treats</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #fcf8ee; --primary-pink: #eb547c; --primary-purple: #2f1d58;
+            --accent-yellow: #f6c042; --text-dark: #1a1a1a; --text-muted: #666;
+            --font-main: 'Nunito', sans-serif; --card-bg: #ffffff;
+            --border-color: #eaeaea;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-main); color: var(--text-dark); font-family: var(--font-main); overflow-x: hidden; }
+        a { text-decoration: none; }
+
+        .navbar { background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .nav-links { display: flex; gap: 25px; align-items: center; }
+        .nav-links a { color: var(--text-dark); font-weight: 700; font-size: 1rem; position: relative; transition: color 0.3s;}
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-pink); }
+        .nav-icons { display: flex; gap: 20px; align-items: center; font-size: 1.3rem; color: var(--text-dark); }
+        
+        .cart-wrap { position: relative; display: flex; align-items: center; cursor: pointer; }
+        .cart-badge { background: var(--accent-yellow); color: var(--text-dark); font-size: 0.75rem; font-weight: 900; border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; position: absolute; top: -8px; right: -10px; border: 2px solid #fff; }
+        .mobile-menu-btn { display: none; }
+
+        /* --- FIXED: CART SIDEBAR --- */
+        .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(47, 29, 88, 0.6); backdrop-filter: blur(3px); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s; }
+        .cart-overlay.active { display: block; opacity: 1; }
+        
+        .cart-sidebar { 
+            position: fixed; top: 0; right: -400px; width: 100%; max-width: 380px; 
+            height: 100%; height: 100dvh; 
+            background: #fff; box-shadow: -5px 0 30px rgba(0,0,0,0.15); z-index: 1000; 
+            transition: right 0.3s ease; display: flex; flex-direction: column; 
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; color: var(--primary-purple); }
+        .cart-header h2 { margin: 0; font-size: 1.5rem; font-weight: 900; }
+        .close-cart { font-size: 1.5rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
+        .close-cart:hover { color: var(--primary-pink); }
+        .cart-items { flex: 1; overflow-y: auto; padding: 20px; }
+        .cart-item { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; }
+        .cart-item img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; background: var(--bg-main);}
+        .cart-item-details { flex: 1; }
+        .cart-item-title { font-weight: 800; font-size: 1rem; color: var(--primary-purple); margin: 0 0 5px 0; line-height: 1.2;}
+        .cart-item-price { font-weight: 800; color: var(--text-dark); margin: 0 0 5px 0;}
+        .cart-item-remove { color: var(--primary-pink); font-size: 0.85rem; cursor: pointer; font-weight: 700; }
+        
+        .cart-footer { 
+            padding: 20px; 
+            padding-bottom: max(20px, env(safe-area-inset-bottom)); 
+            border-top: 1px solid var(--border-color); 
+            background: #fafafa;
+            margin-top: auto;
+        }
+        .cart-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 900; color: var(--primary-purple); margin-bottom: 15px; }
+        .btn-checkout { background: var(--primary-pink); color: #fff; text-align: center; display: block; padding: 15px; border-radius: 15px; text-decoration: none; font-weight: 800; font-size: 1.1rem; transition: transform 0.2s;}
+        .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(235, 84, 124, 0.3); }
+
+        .shop-header { padding: 40px 5% 20px; text-align: center; }
+        .shop-header h1 { font-size: 2.5rem; color: var(--primary-purple); font-weight: 900; margin-bottom: 10px; }
+        .shop-header p { color: var(--text-muted); font-size: 1.1rem; font-weight: 600; }
+
+        .product-container { padding: 20px 5% 80px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; align-items: stretch; }
+
+        .product-card { background: var(--card-bg); border-radius: 20px; padding: 15px; position: relative; box-shadow: 0 8px 25px rgba(0,0,0,0.06); display: flex; flex-direction: column; border: 2px solid transparent; transition: border 0.3s, transform 0.3s; }
+        .product-card:hover { border-color: var(--primary-pink); transform: translateY(-5px); }
+        .badge { position: absolute; top: 15px; left: 15px; padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; color: #fff; z-index: 2; }
+        .badge.new { background: #2ecc71; }
+        .badge.best { background: var(--accent-yellow); color: var(--text-dark); }
+        
+        .product-link-wrapper { display: flex; flex-direction: column; flex-grow: 1; text-decoration: none; color: inherit; }
+        .product-img { width: 100%; height: 200px; object-fit: contain; margin-top: 15px; margin-bottom: 15px; border-radius: 10px; background: #fafafa;}
+        .product-title { font-size: 1.1rem; font-weight: 800; color: var(--primary-purple); margin-bottom: 5px; line-height: 1.3;}
+        .product-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; font-weight: 600;}
+        
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; margin-bottom: 15px; }
+        .rating { color: var(--accent-yellow); font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .price { font-size: 1.4rem; font-weight: 900; color: var(--text-dark); }
+        
+        .btn-add-cart { background: var(--primary-pink); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: background 0.3s, transform 0.2s; margin-top: 10px; }
+        .btn-add-cart:hover { background: #d63c63; transform: scale(1.02); }
+
+        .site-footer { background: var(--primary-purple); color: #fff; padding: 60px 5% 20px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; margin-bottom: 40px; }
+        .footer-desc { font-size: 0.95rem; line-height: 1.6; margin: 15px 0 20px; color: #d1c8e3; font-weight: 500;}
+        .social-icons { display: flex; gap: 15px; }
+        .social-icons a { width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .footer-col h4 { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; color: #fff; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a { color: #d1c8e3; font-weight: 600; font-size: 0.95rem; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #d1c8e3; font-weight: 600;}
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; width: 100%; flex-direction: column; gap: 15px; background: #fff; position: absolute; top: 100%; left: 0; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+            .nav-links.active { display: flex !important; }
+            .mobile-menu-btn { display: block; font-size: 1.5rem; color: var(--primary-purple); cursor: pointer; border: none; background: none;}
+            
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .product-card { padding: 12px; border-radius: 15px; }
+            .product-img { height: 120px; margin-top: 10px; margin-bottom: 10px; }
+            .product-title { font-size: 0.95rem; }
+            .product-desc { font-size: 0.75rem; margin-bottom: 10px;}
+            .price { font-size: 1.1rem; }
+            .btn-add-cart { padding: 8px; font-size: 0.9rem; }
+            .badge { top: 10px; left: 10px; padding: 4px 8px; font-size: 0.65rem; }
+            
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+        }
+        @media (min-width: 769px) { .mobile-menu-btn { display: none; } }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <a href="/" style="display: block;">
+                <img src="{{ url_for('static', filename='requirements/images/logo.jpeg') }}" alt="Bangalore Treats" style="max-height: 55px; object-fit: contain;">
+            </a>
+        </div>
+        
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop" class="active">Shop</a>
+            <a href="/shop">Chocolates</a>
+            <a href="/shop">Toys</a>
+            <a href="/shop">Gift Hampers</a>
+            <a href="/#contact">Contact</a>
+        </nav>
+        
+        <div class="nav-icons">
+            <div class="cart-wrap" onclick="openCart()">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-badge" id="cartBadge">0</span>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- SLIDE-OUT CART OVERLAY -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>Your Treats</h2>
+            <i class="fa-solid fa-xmark close-cart" onclick="closeCart()"></i>
+        </div>
+        <div class="cart-items" id="cartItemsContainer"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Subtotal:</span>
+                <span id="cartTotalDisplay">₹0.00</span>
+            </div>
+            <a href="/checkout_page" class="btn-checkout">Proceed to Checkout <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i></a>
+        </div>
+    </div>
+
+    <div class="shop-header">
+        <h1>Explore All Treats</h1>
+        <p>From nostalgic 90s chocolates to fun toys, find everything here!</p>
+    </div>
+
+    <section class="product-container">
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                {% if product.badge %}
+                <span class="badge {% if product.badge|lower == 'new' %}new{% else %}best{% endif %}">{{ product.badge }}</span>
+                {% endif %}
+                
+                <a href="/product/{{ product.id }}" class="product-link-wrapper">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=300&q=80'">
+                    <h3 class="product-title">{{ product.name }}</h3>
+                    <p class="product-desc">{{ product.tagline }}</p>
+                    
+                    <div class="price-row">
+                        <div class="rating"><i class="fa-solid fa-star"></i> 4.8</div>
+                        <div class="price">₹{{ product.price }}</div>
+                    </div>
+                </a>
+                
+                <!-- Fixed Add to Cart Button -->
+                <button type="button" class="btn-add-cart" onclick="addToCart('{{ product.name|replace("'", "\\'") }}', {{ product.price }}, '{{ product.image_url }}')">
+                    <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                </button>
+            </div>
+            {% else %}
+                <p style="text-align: center; width: 100%; font-weight: bold; color: var(--text-muted); grid-column: 1 / -1;">No products found in the database.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer class="site-footer" id="contact">
+        <div class="footer-grid">
+            <div class="footer-col footer-logo">
+                <a href="/" style="display: block; margin-bottom: 15px;">
+                    <img src="{{ url_for('static', filename='requirements/images/logo.jpeg') }}" alt="Bangalore Treats" style="max-height: 55px; border-radius: 8px;">
+                </a>
+                <p class="footer-desc">Bringing joy to kids with<br>chocolates, toys & more.</p>
+                <div class="social-icons">
+                    <a href="{{ settings.instagram }}"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="{{ settings.facebook }}"><i class="fa-brands fa-facebook-f"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul><li><a href="/">Home</a></li><li><a href="/shop">Shop</a></li><li><a href="/#contact">Contact Us</a></li></ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bangalore Treats. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- CART LOGIC ---
+        let cart = JSON.parse(localStorage.getItem('bTreatsCart')) || [];
+
+        function updateCartUI() {
+            const badge = document.getElementById('cartBadge');
+            const itemsContainer = document.getElementById('cartItemsContainer');
+            const totalDisplay = document.getElementById('cartTotalDisplay');
+            
+            badge.innerText = cart.length;
+            itemsContainer.innerHTML = '';
+            let total = 0;
+            
+            if(cart.length === 0) {
+                itemsContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:40px; font-weight:700;"><i class="fa-solid fa-basket-shopping" style="font-size:2rem; margin-bottom:10px; opacity:0.5;"></i><br>Your cart is empty!</p>';
+            } else {
+                cart.forEach((item, index) => {
+                    total += parseFloat(item.price);
+                    itemsContainer.innerHTML += `
+                        <div class="cart-item">
+                            <img src="${item.image}" onerror="this.src='https://images.unsplash.com/photo-1548907040-4baa42d10919?w=100'">
+                            <div class="cart-item-details">
+                                <h4 class="cart-item-title">${item.name}</h4>
+                                <p class="cart-item-price">₹${item.price}</p>
+                                <span class="cart-item-remove" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash-can"></i> Remove</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            totalDisplay.innerText = `₹${total.toFixed(2)}`;
+            localStorage.setItem('bTreatsCart', JSON.stringify(cart));
+        }
+
+        function addToCart(name, price, image) {
+            cart.push({name, price, image});
+            updateCartUI();
+            openCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() {
+            document.getElementById('cartSidebar').classList.add('open');
+            document.getElementById('cartOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCart() {
+            document.getElementById('cartSidebar').classList.remove('open');
+            document.getElementById('cartOverlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateCartUI();
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const navLinks = document.querySelector('.nav-links');
+            if (mobileBtn) { mobileBtn.addEventListener('click', () => { navLinks.classList.toggle('active'); }); }
+        });
+    </script>
+</body>
+</html>

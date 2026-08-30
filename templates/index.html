@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangalore Treats | 90's Memories, Chocolates & Toys</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #fcf8ee; --primary-pink: #eb547c; --primary-purple: #2f1d58;
+            --secondary-purple: #5c3e98; --accent-yellow: #f6c042; --text-dark: #1a1a1a;
+            --text-muted: #666; --font-main: 'Nunito', sans-serif; --card-bg: #ffffff;
+            --border-color: #eaeaea;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-main); color: var(--text-dark); font-family: var(--font-main); overflow-x: hidden; }
+        a { text-decoration: none; }
+
+        .top-bar { background-color: var(--primary-purple); color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 8px 5%; font-size: 0.85rem; font-weight: 600; }
+        .top-bar-center { color: var(--accent-yellow); display: flex; align-items: center; gap: 8px; justify-content: center;}
+        .top-bar-links a { color: #fff; margin-left: 15px; transition: color 0.2s;}
+        .top-bar-links a:hover { color: var(--accent-yellow); }
+
+        .navbar { background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .nav-links { display: flex; gap: 25px; align-items: center; }
+        .nav-links a { color: var(--text-dark); font-weight: 700; font-size: 1rem; position: relative; transition: color 0.3s;}
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-pink); }
+        .nav-links a.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 3px; background: var(--primary-pink); border-radius: 5px; }
+        
+        .nav-icons { display: flex; gap: 20px; align-items: center; font-size: 1.3rem; color: var(--text-dark); }
+        .nav-icons i { cursor: pointer; transition: color 0.3s; }
+        .nav-icons i:hover { color: var(--primary-pink); }
+        
+        .search-container { display: flex; align-items: center; position: relative; }
+        .search-input { width: 0; opacity: 0; padding: 0; border: none; border-radius: 20px; transition: all 0.3s ease; font-family: var(--font-main); font-weight: 600; color: var(--text-dark); }
+        .search-input.active { width: 180px; opacity: 1; padding: 8px 15px; margin-right: 10px; border: 1px solid var(--border-color); background: var(--bg-main); outline: none; }
+        
+        .cart-wrap { position: relative; display: flex; align-items: center; cursor: pointer; }
+        .cart-badge { background: var(--accent-yellow); color: var(--text-dark); font-size: 0.75rem; font-weight: 900; border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; position: absolute; top: -8px; right: -10px; border: 2px solid #fff; }
+        .mobile-menu-btn { display: none; }
+
+        /* --- FIXED: MOBILE SLIDE-OUT CART MODAL --- */
+        .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(47, 29, 88, 0.6); backdrop-filter: blur(3px); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s; }
+        .cart-overlay.active { display: block; opacity: 1; }
+        
+        .cart-sidebar { 
+            position: fixed; top: 0; right: -400px; width: 100%; max-width: 380px; 
+            height: 100%; height: 100dvh; /* 100dvh is the magic fix for mobile browser bottom bars */
+            background: #fff; box-shadow: -5px 0 30px rgba(0,0,0,0.15); z-index: 1000; 
+            transition: right 0.3s ease; display: flex; flex-direction: column; 
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; color: var(--primary-purple); }
+        .cart-header h2 { margin: 0; font-size: 1.5rem; font-weight: 900; }
+        .close-cart { font-size: 1.5rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
+        .close-cart:hover { color: var(--primary-pink); }
+        .cart-items { flex: 1; overflow-y: auto; padding: 20px; }
+        .cart-item { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; }
+        .cart-item img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; background: var(--bg-main);}
+        .cart-item-details { flex: 1; }
+        .cart-item-title { font-weight: 800; font-size: 1rem; color: var(--primary-purple); margin: 0 0 5px 0; line-height: 1.2;}
+        .cart-item-price { font-weight: 800; color: var(--text-dark); margin: 0 0 5px 0;}
+        .cart-item-remove { color: var(--primary-pink); font-size: 0.85rem; cursor: pointer; font-weight: 700; }
+        
+        /* Fixed bottom padding for iPhones/Mobile */
+        .cart-footer { 
+            padding: 20px; 
+            padding-bottom: max(20px, env(safe-area-inset-bottom)); /* Prevents hiding behind iOS/Android swipe bar */
+            border-top: 1px solid var(--border-color); 
+            background: #fafafa;
+            margin-top: auto;
+        }
+        .cart-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 900; color: var(--primary-purple); margin-bottom: 15px; }
+        .btn-checkout { background: var(--primary-pink); color: #fff; text-align: center; display: block; padding: 15px; border-radius: 15px; text-decoration: none; font-weight: 800; font-size: 1.1rem; transition: transform 0.2s;}
+        .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(235, 84, 124, 0.3); }
+
+        .hero { position: relative; margin: 20px 5%; border-radius: 30px; overflow: hidden; display: flex; align-items: center; padding: 0 5%; aspect-ratio: 16 / 9; width: auto; box-shadow: 0 15px 30px rgba(47, 29, 88, 0.2); background-color: var(--primary-purple); }
+        .hero-bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: linear-gradient(to right, rgba(47, 29, 88, 0.85) 0%, rgba(47, 29, 88, 0.3) 60%, transparent 100%); }
+        .hero-content { position: relative; z-index: 10; max-width: 55%; color: #fff; }
+        .hero-title-kannada { font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; color: var(--accent-yellow); line-height: 1.2; text-shadow: 2px 2px 0px var(--primary-pink); margin-bottom: 15px; }
+        .hero-text { font-size: clamp(0.9rem, 1.5vw, 1.3rem); font-weight: 600; margin-bottom: 30px; line-height: 1.5; color: #eef; }
+        .btn-shop { background: var(--primary-pink); color: #fff; padding: 12px 30px; border-radius: 30px; font-size: clamp(0.9rem, 1.2vw, 1.1rem); font-weight: 800; display: inline-flex; align-items: center; gap: 10px; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(235, 84, 124, 0.4); transition: transform 0.2s; text-decoration: none; }
+        .btn-shop:hover { transform: translateY(-3px); }
+        .hero-trust { display: inline-flex; align-items: center; gap: 10px; margin-left: 20px; font-weight: 700; font-size: clamp(0.7rem, 1vw, 0.9rem);}
+        .hero-trust i { color: var(--accent-yellow); font-size: 1.5rem; }
+
+        .categories { display: flex; justify-content: flex-start; gap: 30px; padding: 40px 5%; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: transform 0.3s; scroll-snap-align: start; flex: 0 0 auto;}
+        .cat-item:hover { transform: translateY(-5px); }
+        .cat-box { width: 100px; height: 100px; border-radius: 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .cat-item:nth-child(1) .cat-box { background: #fff0eb; }
+        .cat-item:nth-child(2) .cat-box { background: #fff8e1; }
+        .cat-item:nth-child(3) .cat-box { background: #e0f7fa; }
+        .cat-item:nth-child(4) .cat-box { background: #fce4ec; }
+        .cat-item:nth-child(5) .cat-box { background: #f3e5f5; }
+        .cat-item:nth-child(6) .cat-box { background: #e8eaf6; }
+        .cat-item:nth-child(7) .cat-box { background: #fff3e0; }
+        .cat-item span { font-weight: 700; font-size: 0.95rem; color: var(--text-dark); }
+        .cat-box img { width: 50%; height: 50%; object-fit: contain; }
+
+        .featured-picks { margin-bottom: 50px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; }
+        .section-title { font-size: 2rem; font-weight: 900; color: var(--primary-purple); display: flex; align-items: center; gap: 10px; }
+        .section-title i { color: var(--primary-pink); font-size: 1.5rem; }
+        .btn-view-all { background: transparent; border: 2px solid var(--primary-pink); color: var(--primary-pink); padding: 8px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-decoration: none;}
+        .btn-view-all:hover { background: var(--primary-pink); color: #fff; }
+
+        .product-slider-container { position: relative; padding: 0 5%; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; align-items: stretch; }
+        .product-card { background: var(--card-bg); border-radius: 20px; padding: 15px; position: relative; box-shadow: 0 8px 25px rgba(0,0,0,0.06); display: flex; flex-direction: column; border: 2px solid transparent; transition: border 0.3s, transform 0.3s; }
+        .product-card:hover { border-color: var(--primary-pink); transform: translateY(-5px); }
+        .badge { position: absolute; top: 15px; left: 15px; padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; color: #fff; z-index: 2; }
+        .badge.new { background: #2ecc71; }
+        .badge.best { background: var(--accent-yellow); color: var(--text-dark); }
+        .wishlist-btn { position: absolute; top: 15px; right: 15px; color: #ccc; background: none; border: none; font-size: 1.2rem; cursor: pointer; z-index: 2; transition: color 0.2s;}
+        .wishlist-btn:hover { color: var(--primary-pink); }
+        .product-link-wrapper { display: flex; flex-direction: column; flex-grow: 1; text-decoration: none; color: inherit; }
+        .product-img { width: 100%; height: 180px; object-fit: contain; margin-top: 15px; margin-bottom: 15px; border-radius: 10px; background: #fafafa;}
+        .product-title { font-size: 1.1rem; font-weight: 800; color: var(--primary-purple); margin-bottom: 5px; line-height: 1.3;}
+        .product-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; font-weight: 600;}
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; margin-bottom: 15px; }
+        .rating { color: var(--accent-yellow); font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .rating span { color: var(--text-muted); font-size: 0.8rem; font-weight: 600;}
+        .price { font-size: 1.4rem; font-weight: 900; color: var(--text-dark); }
+        
+        .btn-add-cart { background: var(--primary-pink); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: background 0.3s, transform 0.2s; margin-top: 10px; }
+        .btn-add-cart:hover { background: #d63c63; transform: scale(1.02); }
+
+        .promos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; padding: 20px 5% 60px; }
+        .promo-card { border-radius: 25px; padding: 30px; position: relative; overflow: hidden; display: flex; align-items: center; min-height: 220px; color: #fff; }
+        .promo-content { position: relative; z-index: 2; width: 60%; }
+        .promo-img { position: absolute; right: 0; top: 0; width: 40%; height: 100%; object-fit: cover; z-index: 1; }
+        .promo-1 { background: linear-gradient(135deg, #6c42a3 0%, #4a287a 100%); }
+        .promo-2 { background: linear-gradient(135deg, #eb547c 0%, #c4395e 100%); }
+        .promo-3 { background: linear-gradient(135deg, #f6c042 0%, #e0a926 100%); color: var(--text-dark); }
+        .promo-card h3 { font-size: 1.6rem; font-weight: 900; margin-bottom: 10px; line-height: 1.2; }
+        .promo-card p { font-size: 0.9rem; font-weight: 600; margin-bottom: 20px; opacity: 0.9; }
+        .btn-promo { align-self: flex-start; padding: 10px 25px; border-radius: 20px; font-weight: 800; border: none; cursor: pointer; text-decoration: none; display: inline-block;}
+        .promo-1 .btn-promo { background: var(--accent-yellow); color: var(--text-dark); }
+        .promo-2 .btn-promo { background: var(--primary-purple); color: #fff; }
+        .promo-3 .btn-promo { background: var(--text-dark); color: #fff; }
+
+        .features-strip { display: flex; justify-content: space-between; padding: 40px 5%; background: #fff; border-top: 1px solid var(--border-color); }
+        .feature-item { display: flex; align-items: center; gap: 15px; }
+        .feature-icon { width: 50px; height: 50px; background: var(--bg-main); border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--primary-purple); }
+        .feature-item h4 { font-size: 1rem; font-weight: 800; color: var(--text-dark); margin-bottom: 2px;}
+        .feature-item p { font-size: 0.85rem; color: var(--text-muted); font-weight: 600;}
+
+        .site-footer { background: var(--primary-purple); color: #fff; padding: 60px 5% 20px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; margin-bottom: 40px; }
+        .footer-desc { font-size: 0.95rem; line-height: 1.6; margin: 15px 0 20px; color: #d1c8e3; font-weight: 500;}
+        .social-icons { display: flex; gap: 15px; }
+        .social-icons a { width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; transition: background 0.3s; }
+        .social-icons a:hover { background: var(--primary-pink); }
+        .footer-col h4 { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; color: #fff; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a { color: #d1c8e3; font-weight: 600; font-size: 0.95rem; transition: color 0.3s; }
+        .footer-col ul li a:hover { color: var(--accent-yellow); }
+        .newsletter-form { position: relative; margin-top: 15px; }
+        .newsletter-form input { width: 100%; padding: 15px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; font-family: var(--font-main); font-weight: 600;}
+        .newsletter-form input:focus { outline: none; border-color: var(--accent-yellow); }
+        .newsletter-form button { position: absolute; right: 5px; top: 5px; bottom: 5px; background: var(--accent-yellow); border: none; border-radius: 25px; padding: 0 20px; color: var(--text-dark); font-weight: 800; cursor: pointer; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #d1c8e3; font-weight: 600;}
+        .payment-icons { display: flex; gap: 15px; font-size: 1.5rem; color: #fff;}
+
+        @media (max-width: 1024px) { .promos { grid-template-columns: 1fr; } .footer-grid { grid-template-columns: 1fr 1fr; } }
+        
+        @media (max-width: 768px) {
+            .top-bar-links { display: none; }
+            .top-bar { justify-content: center; padding: 8px; }
+            .nav-links { display: none; width: 100%; flex-direction: column; gap: 15px; background: #fff; position: absolute; top: 100%; left: 0; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+            .nav-links.active { display: flex !important; }
+            .mobile-menu-btn { display: block; font-size: 1.5rem; color: var(--primary-purple); cursor: pointer; border: none; background: none;}
+            
+            .search-input.active { width: 130px; }
+
+            .hero { aspect-ratio: auto; min-height: 450px; margin: 15px 5%; border-radius: 20px; padding: 40px 20px; flex-direction: column; justify-content: flex-end; text-align: center; }
+            .hero-overlay { background: linear-gradient(to top, rgba(47, 29, 88, 0.9) 0%, rgba(47, 29, 88, 0.3) 100%); }
+            .hero-content { max-width: 100%; margin-top: auto; }
+            .hero-title-kannada { font-size: 2.2rem; margin-bottom: 10px; }
+            .hero-text { font-size: 1rem; margin-bottom: 20px; }
+            .hero-trust { display: none; } 
+            
+            .categories { gap: 15px; padding: 20px 5%; }
+            .cat-box { width: 75px; height: 75px; border-radius: 20px; }
+            .cat-item span { font-size: 0.8rem; }
+
+            .section-title { font-size: 1.5rem; }
+            .btn-view-all { padding: 6px 15px; font-size: 0.85rem; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .product-card { min-width: 100%; max-width: 100%; padding: 12px; border-radius: 15px; }
+            .product-img { height: 120px; margin-top: 10px; margin-bottom: 10px; }
+            .product-title { font-size: 0.95rem; }
+            .product-desc { font-size: 0.75rem; margin-bottom: 10px;}
+            .price { font-size: 1.1rem; }
+            .btn-add-cart { padding: 8px; font-size: 0.9rem; }
+            .badge { top: 10px; left: 10px; padding: 4px 8px; font-size: 0.65rem; }
+            .wishlist-btn { top: 10px; right: 10px; font-size: 1rem; }
+            
+            .promo-card { padding: 25px 20px; min-height: 180px;}
+            .promo-content { width: 65%; }
+            .promo-card h3 { font-size: 1.3rem; }
+            .promo-card p { font-size: 0.8rem; }
+            
+            .features-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px 5%; }
+            .feature-item { flex-direction: column; text-align: center; gap: 8px; align-items: center;}
+            .feature-icon { width: 45px; height: 45px; font-size: 1.2rem; }
+            .feature-item h4 { font-size: 0.9rem; }
+            .feature-item p { font-size: 0.75rem; }
+            
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; text-align: center; }
+            .social-icons { justify-content: center; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+        }
+        @media (min-width: 769px) { .mobile-menu-btn { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-bar-links"><i class="fa-solid fa-location-dot"></i> Delivery in Bengaluru <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-left:5px;"></i></div>
+        <div class="top-bar-center"><i class="fa-solid fa-truck-fast"></i> Free delivery on orders above ₹499</div>
+        <div class="top-bar-links">
+            <a href="#"><i class="fa-regular fa-circle-question"></i> Help & Support</a>
+            <a href="#"><i class="fa-solid fa-box-open"></i> Track Order</a>
+        </div>
+    </div>
+
+    <!-- MAIN NAVIGATION -->
+    <header class="navbar">
+        <div class="logo">
+            <a href="/" style="text-decoration:none; display: block;">
+                <img src="{{ url_for('static', filename='requirements/images/logo.jpeg') }}" alt="Bangalore Treats" style="max-height: 50px; object-fit: contain;">
+            </a>
+        </div>
+        
+        <nav class="nav-links">
+            <a href="/" class="active">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/shop">Chocolates</a>
+            <a href="/shop">Toys</a>
+            <a href="/shop">Gift Hampers</a>
+            <a href="/#contact">Contact</a>
+        </nav>
+        
+        <div class="nav-icons">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search treats...">
+                <i class="fa-solid fa-magnifying-glass" id="searchIcon" title="Search"></i>
+            </div>
+            
+            <div class="cart-wrap" onclick="openCart()">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-badge" id="cartBadge">0</span>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- SLIDE-OUT CART OVERLAY -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>Your Treats</h2>
+            <i class="fa-solid fa-xmark close-cart" onclick="closeCart()"></i>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <!-- Items injected via JavaScript -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Subtotal:</span>
+                <span id="cartTotalDisplay">₹0.00</span>
+            </div>
+            <a href="/checkout_page" class="btn-checkout">Proceed to Checkout <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i></a>
+        </div>
+    </div>
+
+    <section class="hero">
+        <img src="{{ url_for('static', filename='requirements/images/herobg.png') }}" class="hero-bg-img" alt="90s Treats Background">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title-kannada">90's<br>ಕನ್ನಡ ಸುಂದರ<br>ನೆನಪುಗಳು...</h1>
+            <p class="hero-text">Sweet Chocolates, Fun Toys & Happy Memories!</p>
+            <div style="display:flex; align-items:center; justify-content:center; flex-wrap: wrap;">
+                <a href="/shop" class="btn-shop">Shop Now <i class="fa-solid fa-arrow-right"></i></a>
+                <div class="hero-trust">
+                    <i class="fa-solid fa-shield-cat"></i>
+                    <span>Loved by<br>10,000+ Families</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="categories">
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/3014/3014498.png" alt="Chocolates"></div><span>Chocolates</span></div>
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/3321/3321087.png" alt="Toys"></div><span>Toys</span></div>
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/2906/2906274.png" alt="Baby Care"></div><span>Baby Care</span></div>
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/1046/1046374.png" alt="School"></div><span>School Essentials</span></div>
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" alt="Gift Hampers"></div><span>Gift Hampers</span></div>
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/3082/3082008.png" alt="Kids Corner"></div><span>Kids Corner</span></div>
+        <div class="cat-item"><div class="cat-box"><img src="https://cdn-icons-png.flaticon.com/512/879/879859.png" alt="Combo Offers"></div><span>Combo Offers</span></div>
+    </section>
+
+    <section class="featured-picks" id="shop">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fa-solid fa-star"></i> Our Featured Picks <i class="fa-solid fa-wand-magic-sparkles" style="font-size:1rem; color:var(--accent-yellow);"></i></h2>
+            <a href="/shop" class="btn-view-all">View All Products</a>
+        </div>
+        
+        <div class="product-slider-container">
+            <div class="product-grid" id="productGrid">
+                
+                {% for product in products[:8] %}
+                <div class="product-card">
+                    {% if product.badge %}
+                    <span class="badge {% if product.badge|lower == 'new' %}new{% else %}best{% endif %}">{{ product.badge }}</span>
+                    {% endif %}
+                    
+                    <button class="wishlist-btn"><i class="fa-regular fa-heart"></i></button>
+                    <a href="/product/{{ product.id }}" class="product-link-wrapper">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=300&q=80'">
+                        <h3 class="product-title">{{ product.name }}</h3>
+                        <p class="product-desc">{{ product.tagline }}</p>
+                        <div class="price-row">
+                            <div class="rating"><i class="fa-solid fa-star"></i> 4.8 <span>(150)</span></div>
+                            <div class="price">₹{{ product.price }}</div>
+                        </div>
+                    </a>
+                    
+                    <button type="button" class="btn-add-cart" onclick="addToCart('{{ product.name|replace("'", "\\'") }}', {{ product.price }}, '{{ product.image_url }}')">
+                        <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+                {% else %}
+                    <p style="padding: 40px; text-align: center; width: 100%; font-weight: bold; color: var(--text-muted); grid-column: 1 / -1;">No products have been added yet. Log into the admin panel to sync inventory.</p>
+                {% endfor %}
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/shop" class="btn-shop" style="text-decoration: none; padding: 15px 40px; font-size: 1.1rem;"><i class="fa-solid fa-layer-group"></i> Explore All Products</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="promos">
+        <div class="promo-card promo-1">
+            <div class="promo-content">
+                <h3>Sweet Hampers<br>For Every Occasion</h3>
+                <p>Make every moment special with our curated hampers.</p>
+                <a href="/shop" class="btn-promo">Explore Hampers</a>
+            </div>
+            <img src="https://images.unsplash.com/photo-1542843137-8791a6904d14?auto=format&fit=crop&w=400&q=80" alt="Hampers" class="promo-img">
+        </div>
+        <div class="promo-card promo-2">
+            <div class="promo-content">
+                <h3>Combotastic<br>Deals!</h3>
+                <p>Chocolates + Toys Best Combos for more smiles!</p>
+                <a href="/shop" class="btn-promo">Shop Combos</a>
+            </div>
+            <img src="https://images.unsplash.com/photo-1582176604856-e822b391c313?auto=format&fit=crop&w=400&q=80" alt="Combos" class="promo-img">
+        </div>
+        <div class="promo-card promo-3">
+            <div class="promo-content">
+                <h3>Flat 15% OFF<br>On First Order</h3>
+                <p>Use Code: BT15</p>
+                <a href="/shop" class="btn-promo">Grab Now</a>
+            </div>
+            <img src="https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=400&q=80" alt="Discount" class="promo-img">
+        </div>
+    </section>
+
+    <section class="features-strip">
+        <div class="feature-item"><div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div><div><h4>Free Delivery</h4><p>Orders > ₹499</p></div></div>
+        <div class="feature-item"><div class="feature-icon"><i class="fa-solid fa-lock"></i></div><div><h4>Secure Payments</h4><p>100% safe & secure</p></div></div>
+        <div class="feature-item"><div class="feature-icon"><i class="fa-solid fa-box-open"></i></div><div><h4>Easy Returns</h4><p>Hassle free returns</p></div></div>
+        <div class="feature-item"><div class="feature-icon"><i class="fa-solid fa-medal"></i></div><div><h4>Best Quality</h4><p>Sourced with love</p></div></div>
+    </section>
+
+    <footer class="site-footer" id="contact">
+        <div class="footer-grid">
+            <div class="footer-col footer-logo">
+                <a href="/" style="text-decoration:none; display: block; margin-bottom: 15px;">
+                    <img src="{{ url_for('static', filename='requirements/images/logo.jpeg') }}" alt="Bangalore Treats" style="max-height: 55px; border-radius: 8px; object-fit: contain;">
+                </a>
+                <p class="footer-desc">Bringing joy to kids with<br>chocolates, toys & more.</p>
+                <div class="social-icons">
+                    <a href="{{ settings.instagram }}"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="{{ settings.facebook }}"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="{{ settings.twitter }}"><i class="fa-brands fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul><li><a href="#">About Us</a></li><li><a href="/shop">Shop</a></li><li><a href="/shop">Chocolates</a></li><li><a href="/shop">Toys</a></li><li><a href="/shop">Gift Hampers</a></li><li><a href="#contact">Contact Us</a></li></ul>
+            </div>
+            <div class="footer-col">
+                <h4>Customer Service</h4>
+                <ul><li><a href="#">Track Order</a></li><li><a href="#">Shipping Policy</a></li><li><a href="#">Returns & Refunds</a></li><li><a href="#">Terms & Conditions</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">FAQ</a></li></ul>
+            </div>
+            <div class="footer-col">
+                <h4>Stay Updated!</h4>
+                <p style="color: #d1c8e3; font-size: 0.95rem; font-weight: 600; margin-bottom: 10px;">Subscribe to get special offers,<br>new arrivals & more.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault();">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit">Subscribe <i class="fa-solid fa-paper-plane" style="margin-left:5px;"></i></button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bangalore Treats. All Rights Reserved.</p>
+            <div class="payment-icons"><i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-google-pay"></i><i class="fa-solid fa-wallet"></i></div>
+        </div>
+    </footer>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('bTreatsCart')) || [];
+
+        function updateCartUI() {
+            const badge = document.getElementById('cartBadge');
+            const itemsContainer = document.getElementById('cartItemsContainer');
+            const totalDisplay = document.getElementById('cartTotalDisplay');
+            
+            badge.innerText = cart.length;
+            itemsContainer.innerHTML = '';
+            let total = 0;
+            
+            if(cart.length === 0) {
+                itemsContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:40px; font-weight:700;"><i class="fa-solid fa-basket-shopping" style="font-size:2rem; margin-bottom:10px; opacity:0.5;"></i><br>Your cart is empty!</p>';
+            } else {
+                cart.forEach((item, index) => {
+                    total += parseFloat(item.price);
+                    itemsContainer.innerHTML += `
+                        <div class="cart-item">
+                            <img src="${item.image}" onerror="this.src='https://images.unsplash.com/photo-1548907040-4baa42d10919?w=100'">
+                            <div class="cart-item-details">
+                                <h4 class="cart-item-title">${item.name}</h4>
+                                <p class="cart-item-price">₹${item.price}</p>
+                                <span class="cart-item-remove" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash-can"></i> Remove</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            totalDisplay.innerText = `₹${total.toFixed(2)}`;
+            localStorage.setItem('bTreatsCart', JSON.stringify(cart));
+        }
+
+        function addToCart(name, price, image) {
+            cart.push({name, price, image});
+            updateCartUI();
+            openCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() {
+            document.getElementById('cartSidebar').classList.add('open');
+            document.getElementById('cartOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCart() {
+            document.getElementById('cartSidebar').classList.remove('open');
+            document.getElementById('cartOverlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        const searchIcon = document.getElementById('searchIcon');
+        const searchInput = document.getElementById('searchInput');
+        searchIcon.addEventListener('click', () => {
+            searchInput.classList.toggle('active');
+            if(searchInput.classList.contains('active')) searchInput.focus();
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const title = card.querySelector('.product-title').innerText.toLowerCase();
+                card.style.display = title.includes(query) ? 'flex' : 'none';
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateCartUI();
+
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const navLinks = document.querySelector('.nav-links');
+            if (mobileBtn) { mobileBtn.addEventListener('click', () => { navLinks.classList.toggle('active'); }); }
+
+            gsap.registerPlugin(ScrollTrigger);
+            const tl = gsap.timeline();
+            
+            if (window.innerWidth > 768) {
+                tl.from(".hero-title-kannada", { y: 30, opacity: 0, duration: 0.8, ease: "back.out(1.5)" })
+                  .from(".hero-text", { y: 20, opacity: 0, duration: 0.6, ease: "power2.out" }, "-=0.4")
+                  .from(".btn-shop", { scale: 0.8, opacity: 0, duration: 0.5, ease: "back.out(2)" }, "-=0.4")
+                  .from(".hero-trust", { x: -20, opacity: 0, duration: 0.5 }, "-=0.3");
+            } else {
+                tl.from(".hero-content", { y: 30, opacity: 0, duration: 0.8, ease: "power2.out" });
+            }
+
+            gsap.from(".cat-item", { scrollTrigger: { trigger: ".categories", start: "top 85%" }, y: 30, opacity: 0, duration: 0.5, stagger: 0.1, ease: "back.out(1.5)" });
+            gsap.from(".product-card", { scrollTrigger: { trigger: ".product-grid", start: "top 80%" }, y: 40, opacity: 0, duration: 0.6, stagger: 0.15, ease: "power2.out" });
+            gsap.from(".promo-card", { scrollTrigger: { trigger: ".promos", start: "top 85%" }, scale: 0.95, opacity: 0, duration: 0.7, stagger: 0.2, ease: "power2.out" });
+        });
+    </script>
+</body>
+</html>

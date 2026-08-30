@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Bangalore Treats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root { --bg-main: #fcf8ee; --primary-pink: #eb547c; --primary-purple: #2f1d58; --accent-yellow: #f6c042; --text-dark: #1a1a1a; --text-muted: #666; --font-main: 'Nunito', sans-serif; --card-bg: #ffffff; }
+        body { background-color: var(--bg-main); color: var(--text-dark); font-family: var(--font-main); margin: 0; overflow-x: hidden;}
+        
+        .navbar { background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top:0; z-index:100;}
+        .navbar a { text-decoration: none; color: var(--text-dark); font-weight: 700; display:flex; align-items:center; gap: 8px;}
+        .navbar a:hover { color: var(--primary-pink); }
+        
+        .checkout-wrapper { padding: 40px 5%; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: start;}
+        
+        /* Left Column: Order Summary & Payment */
+        .payment-card { background: var(--primary-purple); border-radius: 25px; padding: 40px; color: #fff; box-shadow: 0 20px 40px rgba(47, 29, 88, 0.2); text-align: center; position: sticky; top: 100px; opacity:0; transform: translateX(-50px);}
+        .payment-card h2 { font-size: 1.8rem; font-weight: 900; margin-top:0; margin-bottom: 25px; color: var(--accent-yellow); border-bottom: 2px dashed rgba(255,255,255,0.2); padding-bottom: 15px;}
+        
+        .order-summary { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; margin-bottom: 25px; text-align: left;}
+        .order-summary h3 { margin: 0 0 10px 0; font-size: 1.1rem; display: flex; justify-content: space-between;}
+        .order-summary p { margin: 0; font-size: 0.9rem; color: #d1c8e3;}
+
+        .qr-box { background: #fff; padding: 25px; border-radius: 20px; display: inline-block; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .qr-box img { width: 180px; height: 180px; object-fit: contain; }
+        
+        .upi-container { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px;}
+        .upi-text { font-weight: 800; font-size: 1.1rem; letter-spacing: 0.5px;}
+        .btn-copy { background: var(--primary-pink); color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: all 0.3s;}
+        
+        /* Right Column: Comprehensive Form */
+        .shipping-card { background: #fff; border-radius: 25px; padding: 40px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); opacity:0; transform: translateX(50px);}
+        .shipping-card h2 { color: var(--primary-purple); font-size: 1.8rem; font-weight: 900; margin-top:0; margin-bottom: 25px; border-bottom: 2px dashed #eaeaea; padding-bottom: 15px;}
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-dark); font-weight: 800; font-size: 0.95rem;}
+        .form-group input, .form-group textarea { width: 100%; padding: 15px; background: var(--bg-main); border: 2px solid #eaeaea; color: var(--text-dark); border-radius: 12px; box-sizing: border-box; font-family: var(--font-main); font-weight: 600; transition: border-color 0.3s;}
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-pink); background: #fff; }
+        
+        .file-drop-area { border: 2px dashed var(--primary-pink); border-radius: 15px; padding: 30px 20px; text-align: center; background: rgba(235, 84, 124, 0.05); position: relative; cursor: pointer; transition: background 0.3s;}
+        .file-drop-area:hover { background: rgba(235, 84, 124, 0.1); }
+        .file-input { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        
+        .btn-submit { background: var(--primary-pink); color: #fff; padding: 18px; border: none; border-radius: 30px; font-weight: 900; cursor: pointer; width: 100%; font-size: 1.2rem; box-shadow: 0 10px 20px rgba(235, 84, 124, 0.3); transition: transform 0.2s; margin-top: 10px;}
+        .btn-submit:hover { transform: translateY(-3px); }
+
+        @media (max-width: 900px) { 
+            .checkout-wrapper { grid-template-columns: 1fr; } 
+            .payment-card { position: static; }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .shipping-card { padding: 30px 20px; } 
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <a href="/"><img src="{{ url_for('static', filename='requirements/images/logo.jpeg') }}" alt="Logo" style="height: 45px; border-radius: 5px;"></a>
+        <a href="/"><i class="fa-solid fa-arrow-left"></i> Return to Store</a>
+    </header>
+
+    <div class="checkout-wrapper">
+        
+        <!-- Left: Payment Instructions & Animated QR -->
+        <div class="payment-card" id="paymentCard">
+            <h2>1. Order Summary & Payment</h2>
+            
+            <div class="order-summary">
+                <h3>Total Amount to Pay: <span style="color:var(--accent-yellow);">₹199.00</span></h3>
+                <p><i class="fa-solid fa-circle-check" style="color:#2ecc71;"></i> Items ready for dispatch</p>
+            </div>
+
+            <p style="margin-bottom: 20px; font-weight: 600; color:#d1c8e3;">Scan the QR code below or copy the UPI ID to complete your purchase securely.</p>
+            
+            <div class="qr-box" id="qrBox">
+                <!-- Dynamically loads the QR code you set in the admin dashboard -->
+                <img src="{{ settings.qr_code }}" alt="Scan to Pay">
+            </div>
+            
+            <div class="upi-container">
+                <div class="upi-text" id="upiIdText">{{ settings.upi_id }}</div>
+                <button type="button" class="btn-copy" id="copyBtn" onclick="copyUPI()"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--accent-yellow); margin-top: 15px; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Save your 12-digit UTR number after paying!</p>
+        </div>
+
+        <!-- Right: Comprehensive Shipping & Verification Form -->
+        <div class="shipping-card" id="shippingCard">
+            <h2>2. Shipping & Verification</h2>
+            <form action="/checkout_submit" method="POST" enctype="multipart/form-data">
+                
+                <h3 style="color: var(--primary-pink); font-size: 1.1rem; margin-bottom: 15px; border-bottom: 2px solid var(--bg-main); padding-bottom: 5px;">Contact Info</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Full Name</label><input type="text" name="name" required placeholder="e.g. John Doe"></div>
+                    <div class="form-group"><label>Primary Phone</label><input type="tel" name="phone" required placeholder="+91 XXXXX XXXXX"></div>
+                </div>
+                <div class="form-group"><label>Alternate Phone (Optional)</label><input type="tel" name="alternate_phone" placeholder="+91 XXXXX XXXXX"></div>
+
+                <h3 style="color: var(--primary-pink); font-size: 1.1rem; margin-top: 10px; margin-bottom: 15px; border-bottom: 2px solid var(--bg-main); padding-bottom: 5px;">Delivery Details</h3>
+                <div class="form-group"><label>Full Delivery Address</label><textarea name="address" rows="3" required placeholder="House/Flat No, Building Name, Street..."></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Landmark (Optional)</label><input type="text" name="landmark" placeholder="e.g. Near Apollo Hospital"></div>
+                    <div class="form-group"><label>Pincode</label><input type="text" name="pincode" required placeholder="e.g. 560001"></div>
+                </div>
+
+                <h3 style="color: var(--primary-purple); font-size: 1.2rem; margin-top: 15px; margin-bottom: 15px; padding-top: 15px; border-top: 2px dashed #eaeaea;">Payment Verification</h3>
+                <div class="form-group">
+                    <label style="color: var(--primary-purple);">12-Digit UTR / Reference Number</label>
+                    <input type="text" name="utr" required maxlength="12" placeholder="Enter exactly 12 digits">
+                </div>
+                
+                <div class="form-group">
+                    <label>Upload Payment Proof (Screenshot)</label>
+                    <div class="file-drop-area" id="dropArea">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary-pink); margin-bottom:10px;"></i>
+                        <h4 style="margin: 0 0 5px 0; color: var(--text-dark);">Click to Browse or Drag Image Here</h4>
+                        <p id="fileMsg" style="margin: 0; font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Accepts .JPG, .PNG, .PDF</p>
+                        <input class="file-input" type="file" name="payment_proof" id="fileInput" accept="image/*,.pdf" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit"><i class="fa-solid fa-paper-plane"></i> Submit Order</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. COPY UPI ID FUNCTION ---
+        function copyUPI() {
+            var upiText = document.getElementById("upiIdText").innerText;
+            navigator.clipboard.writeText(upiText).then(function() {
+                var btn = document.getElementById("copyBtn");
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                btn.style.background = "#2ecc71";
+                btn.style.color = "#fff";
+                
+                // Reset button after 2 seconds
+                setTimeout(function() {
+                    btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+                    btn.style.background = "var(--primary-pink)";
+                }, 2000);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // --- 2. GSAP ENTRANCE ANIMATIONS ---
+            const tl = gsap.timeline();
+            tl.to("#paymentCard", { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" })
+              .to("#shippingCard", { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.6")
+              .from("#qrBox", { scale: 0.8, opacity: 0, duration: 0.6, ease: "back.out(1.7)" }, "-=0.4");
+
+            // Subtle pulsing animation on QR Box to draw attention
+            gsap.to("#qrBox", {
+                boxShadow: "0 0 40px rgba(255, 255, 255, 0.4)",
+                y: -5,
+                repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut"
+            });
+
+            // --- 3. CUSTOM FILE UPLOAD UI ---
+            const fileInput = document.getElementById('fileInput');
+            const fileMsg = document.getElementById('fileMsg');
+            const dropArea = document.getElementById('dropArea');
+
+            fileInput.addEventListener('change', () => {
+                if(fileInput.files.length > 0) {
+                    fileMsg.innerHTML = `<span style="color: var(--primary-purple);"><i class="fa-solid fa-circle-check" style="color:#2ecc71;"></i> ${fileInput.files[0].name} attached</span>`;
+                    dropArea.style.borderColor = "#2ecc71";
+                    dropArea.style.background = "rgba(46, 204, 113, 0.05)";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
